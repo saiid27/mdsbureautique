@@ -470,11 +470,21 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
               type="tel"
               value={values.phone}
               onChange={onChange("phone")}
-              placeholder="+20 10 0000 0000"
+              placeholder="3430...."
             />
           </label>
           <label>
-            الخدمة 
+            كلمة المرور 
+            <input
+              type="text"
+              value={values.service}
+              onChange={onChange("service")}
+              required
+              placeholder="اريد ترخيص"
+            />
+          </label>
+            <label>
+            كلمة المرور 
             <input
               type="text"
               value={values.service}
