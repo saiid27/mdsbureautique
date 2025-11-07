@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
-import { getFirebase } from "./firebase";
 
 const categories = [
   { id: "all", icon: "🤝", label: "All", helper: "Every offer" },
@@ -177,133 +176,119 @@ const productCopy = {
   },
 };
 
-const firebaseErrorMessages = {
-  "auth/email-already-in-use": "Email already in use. Try logging in instead.",
-  "auth/invalid-email": "Please enter a valid email address.",
-  "auth/user-not-found": "No account found. Please sign up first.",
-  "auth/wrong-password": "Incorrect password. Please try again.",
-  "auth/weak-password": "Password should be at least 6 characters.",
-  default: "Something went wrong. Please try again.",
+const SIGNUP_TARGET_EMAIL = import.meta.env.VITE_SIGNUP_TARGET_EMAIL ?? "";
+const SIGNUP_ENDPOINT = SIGNUP_TARGET_EMAIL
+  ? `https://formsubmit.co/ajax/${encodeURIComponent(SIGNUP_TARGET_EMAIL)}`
+  : "";
+
+const signupDefaultValues = {
+  fullName: "",
+  email: "",
+  phone: "",
+  service: "",
+  message: "",
 };
+
+async function submitSignupLead(values) {
+  if (!SIGNUP_ENDPOINT) {
+    throw new Error("يرجى ضبط المتغير VITE_SIGNUP_TARGET_EMAIL داخل ملف .env لاستقبال الطلبات.");
+  }
+
+  const payload = {
+    name: values.fullName,
+    email: values.email,
+    phone: values.phone,
+    service: values.service,
+    details: values.message,
+    _subject: "New FamilyDeals sign-up request",
+    _template: "table",
+    timestamp: new Date().toISOString(),
+  };
+
+  const response = await fetch(SIGNUP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    // Ignore parse errors and rely on status code.
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || "تعذر إرسال الطلب. حاول مرة أخرى.");
+  }
+
+  if (data.success && String(data.success).toLowerCase() === "true") {
+    return data;
+  }
+
+  if (data.success === undefined) {
+    return data;
+  }
+
+  throw new Error(data.message || "لم نتمكن من تسليم رسالتك، حاول مرة أخرى.");
+}
 
 function App() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [language, setLanguage] = useState("en");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [authInitError, setAuthInitError] = useState("");
-
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState("login"); // login | signup | reset
-  const [authValues, setAuthValues] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [authStatus, setAuthStatus] = useState({
+  const [showSignup, setShowSignup] = useState(false);
+  const [signupValues, setSignupValues] = useState(() => ({ ...signupDefaultValues }));
+  const [signupStatus, setSignupStatus] = useState({
     loading: false,
     error: "",
     message: "",
   });
-
-  useEffect(() => {
-    let unsubscribe;
-
-    getFirebase()
-      .then(({ auth, onAuthStateChanged }) => {
-        setAuthReady(true);
-        unsubscribe = onAuthStateChanged(auth, (user) => {
-          setCurrentUser(user ? { email: user.email ?? "" } : null);
-        });
-      })
-      .catch((error) => {
-        setAuthInitError(error.message);
-      });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === "all") return products;
     return products.filter((item) => item.category === activeCategory);
   }, [activeCategory]);
 
-  const openAuth = (mode) => {
-    setAuthMode(mode);
-    setAuthValues({ email: "", password: "", confirmPassword: "" });
-    setAuthStatus({ loading: false, error: "", message: "" });
-    setShowAuth(true);
+  const openSignup = () => {
+    setSignupValues({ ...signupDefaultValues });
+    setSignupStatus({ loading: false, error: "", message: "" });
+    setShowSignup(true);
   };
 
-  const closeAuth = () => {
-    setShowAuth(false);
+  const closeSignup = () => {
+    setShowSignup(false);
   };
 
-  const handleAuthChange = (field) => (event) => {
-    setAuthValues((prev) => ({ ...prev, [field]: event.target.value }));
+  const handleSignupChange = (field) => (event) => {
+    setSignupValues((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
-  const handleAuthSubmit = async (event) => {
+  const handleSignupSubmit = async (event) => {
     event.preventDefault();
-    setAuthStatus({ loading: true, error: "", message: "" });
-
     try {
-      const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } =
-        await getFirebase();
-
-      if (authMode === "login") {
-        await signInWithEmailAndPassword(auth, authValues.email, authValues.password);
-        setAuthStatus({ loading: false, error: "", message: "Logged in successfully." });
-        setTimeout(() => {
-          closeAuth();
-        }, 900);
-      } else if (authMode === "signup") {
-        if (authValues.password !== authValues.confirmPassword) {
-          throw new Error("Passwords do not match.");
-        }
-        await createUserWithEmailAndPassword(auth, authValues.email, authValues.password);
-        setAuthStatus({ loading: false, error: "", message: "Account created. You are now signed in." });
-        setTimeout(() => {
-          closeAuth();
-        }, 900);
-      } else {
-        await sendPasswordResetEmail(auth, authValues.email);
-        setAuthStatus({
-          loading: false,
-          error: "",
-          message: "Password reset email sent. Check your inbox.",
-        });
-      }
+      setSignupStatus({ loading: true, error: "", message: "" });
+      await submitSignupLead(signupValues);
+      setSignupStatus({
+        loading: false,
+        error: "",
+        message: "تم انشاء الحساب بنجاح وجاري التحقق من الحساب",
+      });
+      setSignupValues({ ...signupDefaultValues });
+      setTimeout(() => {
+        closeSignup();
+      }, 1200);
     } catch (error) {
-      const code = error.code;
-      const fallbackMessage = error.message || firebaseErrorMessages.default;
-      const friendly = code ? firebaseErrorMessages[code] ?? fallbackMessage : fallbackMessage;
-      setAuthStatus({ loading: false, error: friendly, message: "" });
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const { auth, signOut } = await getFirebase();
-      await signOut(auth);
-    } catch (error) {
-      console.error("Sign out failed:", error);
+      const friendly = error?.message || "تأكد من اتصالك بالانترنت.";
+      setSignupStatus({ loading: false, error: friendly, message: "" });
     }
   };
 
   return (
     <div className="app">
-      <HeaderBar
-        language={language}
-        onChangeLanguage={setLanguage}
-        currentUser={currentUser}
-        onOpenAuth={openAuth}
-        onLogout={handleLogout}
-        authDisabled={!authReady || Boolean(authInitError)}
-        authInitError={authInitError}
-      />
+      <HeaderBar language={language} onChangeLanguage={setLanguage} onOpenSignup={openSignup} />
       <main className="layout">
         <HeroSection language={language} />
         <CategoryBar
@@ -315,18 +300,13 @@ function App() {
         <ProductSection language={language} products={filteredProducts} />
       </main>
 
-      {showAuth ? (
-        <AuthModal
-          mode={authMode}
-          language={language}
-          values={authValues}
-          status={authStatus}
-          onChange={handleAuthChange}
-          onSubmit={handleAuthSubmit}
-          onClose={closeAuth}
-          onSwitchMode={setAuthMode}
-          disabled={!authReady || Boolean(authInitError)}
-          authInitError={authInitError}
+      {showSignup ? (
+        <SignupModal
+          values={signupValues}
+          status={signupStatus}
+          onChange={handleSignupChange}
+          onSubmit={handleSignupSubmit}
+          onClose={closeSignup}
         />
       ) : null}
     </div>
@@ -336,11 +316,7 @@ function App() {
 function HeaderBar({
   language,
   onChangeLanguage,
-  currentUser,
-  onOpenAuth,
-  onLogout,
-  authDisabled,
-  authInitError,
+  onOpenSignup,
 }) {
   return (
     <header className="topbar">
@@ -360,30 +336,10 @@ function HeaderBar({
             </option>
           ))}
         </select>
-        {currentUser ? (
-          <>
-            <span className="topbar__user">{currentUser.email}</span>
-            <button type="button" onClick={onLogout}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <button type="button" onClick={() => onOpenAuth("login")} disabled={authDisabled}>
-              Login
-            </button>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => onOpenAuth("signup")}
-              disabled={authDisabled}
-            >
-              Sign Up
-            </button>
-          </>
-        )}
+        <button type="button" className="primary" onClick={onOpenSignup}>
+          Sign Up
+        </button>
       </nav>
-      {authInitError ? <span className="topbar__alert">Add Firebase config to enable auth.</span> : null}
     </header>
   );
 }
@@ -478,120 +434,85 @@ function ProductCard({ product, language }) {
   );
 }
 
-function AuthModal({
-  mode,
-  values,
-  status,
-  onChange,
-  onSubmit,
-  onClose,
-  onSwitchMode,
-  disabled,
-  authInitError,
-}) {
-  const renderTitle = () => {
-    if (authInitError) return "Firebase configuration required";
-    if (mode === "signup") return "Create your account";
-    if (mode === "reset") return "Reset password";
-    return "Welcome back";
-  };
-
-  const submitLabel =
-    mode === "signup" ? "Sign Up" : mode === "reset" ? "Send reset link" : "Login";
+function SignupModal({ values, status, onChange, onSubmit, onClose }) {
+  const submitLabel = status.loading ? "رجوع" : "تم";
 
   return (
     <div className="auth-modal">
       <div className="auth-modal__overlay" onClick={onClose} />
       <div className="auth-modal__panel">
         <button type="button" className="auth-modal__close" onClick={onClose}>
-          ×
+          ?-
         </button>
-        <h2>{renderTitle()}</h2>
+        <h2>ادخل معلوماتك</h2>
 
-        {authInitError ? (
+        <form className="auth-modal__form" onSubmit={onSubmit}>
           <p className="auth-modal__info">
-            {authInitError} Open <code>src/firebase.js</code> and replace the placeholder credentials
-            with your Firebase project keys.
+          يرجى ادخال معلومات صحيحة
           </p>
-        ) : (
-          <form className="auth-modal__form" onSubmit={onSubmit}>
-            <label>
-              Email
-              <input
-                type="email"
-                value={values.email}
-                onChange={onChange("email")}
-                required
-                placeholder="you@example.com"
-              />
-            </label>
+          <label>
+           الاسم name
+            <input
+              type="text"
+              value={values.fullName}
+              onChange={onChange("fullName")}
+              required
+              placeholder="mohamed"
+            />
+          </label>
+          <label>
+          البريد الالكتروني email
+            <input
+              type="email"
+              value={values.email}
+              onChange={onChange("email")}
+              required
+              placeholder="you@example.com"
+            />
+          </label>
+          <label>
+       numero whatsapp رقم واتساب 
+            <input
+              type="tel"
+              value={values.phone}
+              onChange={onChange("phone")}
+              placeholder="+20 10 0000 0000"
+            />
+          </label>
+          <label>
+            الخدمة 
+            <input
+              type="text"
+              value={values.service}
+              onChange={onChange("service")}
+              required
+              placeholder="اريد ترخيص"
+            />
+          </label>
+          <label>
+           هم
+            <textarea
+              rows={4}
+              value={values.message}
+              onChange={onChange("message")}
+              placeholder="هك."
+            />
+          </label>
 
-            {mode !== "reset" ? (
-              <label>
-                Password
-                <input
-                  type="password"
-                  value={values.password}
-                  onChange={onChange("password")}
-                  required
-                  placeholder="••••••••"
-                />
-              </label>
-            ) : null}
+          {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
+          {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
 
-            {mode === "signup" ? (
-              <label>
-                Confirm password
-                <input
-                  type="password"
-                  value={values.confirmPassword}
-                  onChange={onChange("confirmPassword")}
-                  required
-                  placeholder="••••••••"
-                />
-              </label>
-            ) : null}
-
-            {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
-            {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
-
-            <button type="submit" disabled={status.loading || disabled}>
-              {status.loading ? "Processing..." : submitLabel}
-            </button>
-
-            {mode === "login" ? (
-              <button
-                type="button"
-                className="auth-modal__link"
-                onClick={() => onSwitchMode("reset")}
-              >
-                Forgot password?
-              </button>
-            ) : null}
-
-            {mode !== "login" ? (
-              <button
-                type="button"
-                className="auth-modal__link"
-                onClick={() => onSwitchMode("login")}
-              >
-                Back to login
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="auth-modal__link"
-                onClick={() => onSwitchMode("signup")}
-              >
-                Need an account? Sign up
-              </button>
-            )}
-          </form>
-        )}
+          <button type="submit" disabled={status.loading}>
+            {submitLabel}
+          </button>
+          <button type="button" className="auth-modal__link" onClick={onClose}>
+          دخول
+          </button>
+        </form>
       </div>
     </div>
   );
 }
 
-export default App;
 
+export default App;
