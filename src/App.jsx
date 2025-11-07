@@ -436,72 +436,64 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
       <div className="auth-modal__overlay" onClick={onClose} />
       <div className="auth-modal__panel">
         <button type="button" className="auth-modal__close" onClick={onClose}>
-          ?-
+        
         </button>
-        <h2>ادخل معلوماتك</h2>
+        <h2> إنشاء حساب</h2>
 
         <form className="auth-modal__form" onSubmit={onSubmit}>
           <p className="auth-modal__info">
-          يرجى ادخال معلومات صحيحة
+      عند انشاءحساب قد يتظلب التجقق منه دقائق
           </p>
           <label>
-           الاسم name
+          Nom et prénom
             <input
               type="text"
               value={values.fullName}
               onChange={onChange("fullName")}
               required
-              placeholder="mohamed"
+              placeholder="الاسم الكامل"
             />
           </label>
           <label>
-          البريد الالكتروني email
+         Email 
             <input
               type="email"
               value={values.email}
               onChange={onChange("email")}
               required
-              placeholder="you@example.com"
+              placeholder="البريد الالكتروني "
             />
           </label>
           <label>
-       numero whatsapp رقم واتساب 
+       numero whatsapp رقم الواتساب 
             <input
               type="tel"
               value={values.phone}
               onChange={onChange("phone")}
-              placeholder="3430...."
+              placeholder="رقم الواتساب "
             />
           </label>
           <label>
-            كلمة المرور 
+             Mot de passe 
             <input
               type="text"
               value={values.service}
               onChange={onChange("service")}
               required
-              placeholder="اريد ترخيص"
+              placeholder="كلمة المرور "
             />
           </label>
             <label>
-            كلمة المرور 
+           Mot de passe 
             <input
               type="text"
               value={values.service}
               onChange={onChange("service")}
               required
-              placeholder="اريد ترخيص"
+              placeholder=" كلمة المرور  "
             />
           </label>
-          <label>
-           هم
-            <textarea
-              rows={4}
-              value={values.message}
-              onChange={onChange("message")}
-              placeholder="هك."
-            />
-          </label>
+        
 
           {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
           {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
@@ -510,7 +502,7 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
             {submitLabel}
           </button>
           <button type="button" className="auth-modal__link" onClick={onClose}>
-          دخول
+          رجوع 
           </button>
         </form>
       </div>
