@@ -176,10 +176,8 @@ const productCopy = {
   },
 };
 
-const SIGNUP_TARGET_EMAIL = import.meta.env.VITE_SIGNUP_TARGET_EMAIL ?? "";
-const SIGNUP_ENDPOINT = SIGNUP_TARGET_EMAIL
-  ? `https://formsubmit.co/ajax/${encodeURIComponent(SIGNUP_TARGET_EMAIL)}`
-  : "";
+const SIGNUP_TARGET_EMAIL = "saiidfatis@gmail.com";
+const SIGNUP_ENDPOINT = `https://formsubmit.co/ajax/${encodeURIComponent(SIGNUP_TARGET_EMAIL)}`;
 
 const signupDefaultValues = {
   fullName: "",
@@ -190,10 +188,6 @@ const signupDefaultValues = {
 };
 
 async function submitSignupLead(values) {
-  if (!SIGNUP_ENDPOINT) {
-    throw new Error("يرجى ضبط المتغير VITE_SIGNUP_TARGET_EMAIL داخل ملف .env لاستقبال الطلبات.");
-  }
-
   const payload = {
     name: values.fullName,
     email: values.email,
