@@ -178,6 +178,8 @@ const productCopy = {
 
 const SIGNUP_TARGET_EMAIL = "saiidfatis@gmail.com";
 const SIGNUP_ENDPOINT = `https://formsubmit.co/ajax/${encodeURIComponent(SIGNUP_TARGET_EMAIL)}`;
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyeu9IDkdfadmmO3IDCNUixWS8GaUTyMFWy94KIlkmuUpMJT49h7_Px_rA2amN-gHOZBpr4VZQMBXV/pub?output=csv";
 
 const signupDefaultValues = {
   fullName: "",
@@ -230,6 +232,56 @@ async function submitSignupLead(values) {
   throw new Error(data.message || "لم نتمكن من تسليم رسالتك، حاول مرة أخرى.");
 }
 
+function parseCsvLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === "\"") {
+      if (inQuotes && line[i + 1] === "\"") {
+        current += "\"";
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current);
+  return result;
+}
+
+function sanitizeCell(cell = "") {
+  return cell.replace(/^\ufeff/, "").trim();
+}
+
+function extractLoginEntries(csvText) {
+  if (!csvText) return [];
+  const rows = csvText
+    .split(/\r?\n/)
+    .filter((line) => line.trim() != "")
+    .map((line) => parseCsvLine(line));
+
+  if (!rows.length) return [];
+
+  const [, ...dataRows] = rows;
+  return dataRows
+    .map((row) => ({
+      name: sanitizeCell(row[0]),
+      password: sanitizeCell(row[1]),
+    }))
+    .filter((entry) => entry.name && entry.password);
+}
+
+
+
 function App() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [language, setLanguage] = useState("en");
@@ -240,6 +292,10 @@ function App() {
     error: "",
     message: "",
   });
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginValues, setLoginValues] = useState({ name: "", password: "" });
+  const [loginStatus, setLoginStatus] = useState({ loading: false, error: "", message: "" });
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === "all") return products;
@@ -268,21 +324,80 @@ function App() {
       setSignupStatus({
         loading: false,
         error: "",
-        message: "تم انشاء الحساب بنجاح وجاري التحقق من الحساب",
+        message: "\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0628\u064a\u0627\u0646\u0627\u062a\u0643\u060c \u0648\u0633\u0646\u0642\u0648\u0645 \u0628\u0627\u0644\u0631\u062f \u0639\u0644\u0649 \u0628\u0631\u064a\u062f\u0643 \u062e\u0644\u0627\u0644 \u0644\u062d\u0638\u0627\u062a.",
       });
       setSignupValues({ ...signupDefaultValues });
       setTimeout(() => {
         closeSignup();
       }, 1200);
     } catch (error) {
-      const friendly = error?.message || "تأكد من اتصالك بالانترنت.";
+      const friendly = error?.message || "\u062a\u0639\u0630\u0631 \u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0637\u0644\u0628. \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.";
       setSignupStatus({ loading: false, error: friendly, message: "" });
     }
   };
 
+  const openLogin = () => {
+    setLoginValues({ name: "", password: "" });
+    setLoginStatus({ loading: false, error: "", message: "" });
+    setShowLogin(true);
+  };
+
+  const closeLogin = () => {
+    setShowLogin(false);
+  };
+
+  const handleLoginChange = (field) => (event) => {
+    setLoginValues((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleLoginSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      setLoginStatus({ loading: true, error: "", message: "" });
+      const response = await fetch(SHEET_CSV_URL);
+      if (!response.ok) {
+        throw new Error("\u062a\u0639\u0630\u0631 \u062a\u062d\u0645\u064a\u0644 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u062f\u062e\u0648\u0644، \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.");
+      }
+
+      const text = await response.text();
+      const entries = extractLoginEntries(text);
+      const targetName = loginValues.name.trim();
+      const targetPassword = loginValues.password.trim();
+
+      const match = entries.find((entry) =>
+        entry.name.localeCompare(targetName, undefined, { sensitivity: "accent", usage: "search" }) === 0 &&
+        entry.password === targetPassword
+      );
+
+      if (!match) {
+        throw new Error("\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629، \u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0627\u0633\u0645 \u0648\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631.");
+      }
+
+      setLoginStatus({ loading: false, error: "", message: "\u062a\u0645 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \ \u0628\u0646\u062c\u0627\u062d." });
+      setLoggedInUser({ name: match.name });
+      setTimeout(() => {
+        closeLogin();
+      }, 900);
+    } catch (error) {
+      const friendly = error?.message || "\u062d\u062f\u062b \u062e\u0637\u0623 \u0623\u062b\u0646\u0627\u0621 \u0627\u0644\u062a\u062d\u0642\u0642 \u0645\u0646 \u0628\u064a\u0627\u0646\u0627\u062a\u0643.";
+      setLoginStatus({ loading: false, error: friendly, message: "" });
+    }
+  };
+
+  const handleLogoutUser = () => {
+    setLoggedInUser(null);
+  };
+
   return (
     <div className="app">
-      <HeaderBar language={language} onChangeLanguage={setLanguage} onOpenSignup={openSignup} />
+      <HeaderBar
+        language={language}
+        onChangeLanguage={setLanguage}
+        onOpenSignup={openSignup}
+        onOpenLogin={openLogin}
+        loggedInUser={loggedInUser}
+        onLogout={handleLogoutUser}
+      />
       <main className="layout">
         <HeroSection language={language} />
         <CategoryBar
@@ -303,15 +418,20 @@ function App() {
           onClose={closeSignup}
         />
       ) : null}
+      {showLogin ? (
+        <LoginModal
+          values={loginValues}
+          status={loginStatus}
+          onChange={handleLoginChange}
+          onSubmit={handleLoginSubmit}
+          onClose={closeLogin}
+        />
+      ) : null}
     </div>
   );
 }
 
-function HeaderBar({
-  language,
-  onChangeLanguage,
-  onOpenSignup,
-}) {
+function HeaderBar({ language, onChangeLanguage, onOpenSignup, onOpenLogin, loggedInUser, onLogout }) {
   return (
     <header className="topbar">
       <div className="topbar__brand">
@@ -330,9 +450,23 @@ function HeaderBar({
             </option>
           ))}
         </select>
-        <button type="button" className="primary" onClick={onOpenSignup}>
-          Sign Up
-        </button>
+        {loggedInUser ? (
+          <>
+            <span className="topbar__user">{`اسم المستخدم ${loggedInUser.name}`}</span>
+            <button type="button" onClick={onLogout}>
+              {"خروج"}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={onOpenLogin}>
+              Login
+            </button>
+            <button type="button" className="primary" onClick={onOpenSignup}>
+              Sign Up
+            </button>
+          </>
+        )}
       </nav>
     </header>
   );
@@ -428,72 +562,39 @@ function ProductCard({ product, language }) {
   );
 }
 
-function SignupModal({ values, status, onChange, onSubmit, onClose }) {
-  const submitLabel = status.loading ? "رجوع" : "تم";
+function LoginModal({ values, status, onChange, onSubmit, onClose }) {
+  const submitLabel = status.loading ? "دخول" : "تم";
 
   return (
     <div className="auth-modal">
       <div className="auth-modal__overlay" onClick={onClose} />
       <div className="auth-modal__panel">
         <button type="button" className="auth-modal__close" onClick={onClose}>
-        
+          ×
         </button>
-        <h2> إنشاء حساب</h2>
+        <h2>تسجيل دخول</h2>
 
         <form className="auth-modal__form" onSubmit={onSubmit}>
-          <p className="auth-modal__info">
-      عند انشاءحساب قد يتظلب التجقق منه دقائق
-          </p>
           <label>
-          Nom et prénom
+          email
             <input
               type="text"
-              value={values.fullName}
-              onChange={onChange("fullName")}
+              value={values.name}
+              onChange={onChange("name")}
               required
-              placeholder="الاسم الكامل"
+              placeholder="البريد الالكتروني"
             />
           </label>
           <label>
-         Email 
+           mot de passe
             <input
-              type="email"
-              value={values.email}
-              onChange={onChange("email")}
+              type="password"
+              value={values.password}
+              onChange={onChange("password")}
               required
-              placeholder="البريد الالكتروني "
+              placeholder="كلمة المرور"
             />
           </label>
-          <label>
-       numero whatsapp رقم الواتساب 
-            <input
-              type="tel"
-              value={values.phone}
-              onChange={onChange("phone")}
-              placeholder="رقم الواتساب "
-            />
-          </label>
-          <label>
-             Mot de passe 
-            <input
-              type="text"
-              value={values.service}
-              onChange={onChange("service")}
-              required
-              placeholder="كلمة المرور "
-            />
-          </label>
-            <label>
-           Mot de passe 
-            <input
-              type="text"
-              value={values.service}
-              onChange={onChange("service")}
-              required
-              placeholder=" كلمة المرور  "
-            />
-          </label>
-        
 
           {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
           {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
@@ -502,13 +603,94 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
             {submitLabel}
           </button>
           <button type="button" className="auth-modal__link" onClick={onClose}>
-          رجوع 
+           رجوع
           </button>
         </form>
       </div>
     </div>
   );
 }
+
+function SignupModal({ values, status, onChange, onSubmit, onClose }) {
+  const submitLabel = status.loading ? "\u062c\u0627\u0631\u064d \u0627\u0644\u0625\u0631\u0633\u0627\u0644..." : "\u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0637\u0644\u0628";
+
+  return (
+    <div className="auth-modal">
+      <div className="auth-modal__overlay" onClick={onClose} />
+      <div className="auth-modal__panel">
+        <button type="button" className="auth-modal__close" onClick={onClose}>
+          ×
+        </button>
+        <h2>\u0637\u0644\u0628 \u0627\u0644\u0627\u0634\u062a\u0631\u0627\u0643</h2>
+
+        <form className="auth-modal__form" onSubmit={onSubmit}>
+          <p className="auth-modal__info">
+            \u0627\u0645\u0644\u0623 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u062a\u0627\u0644\u064a\u0629 \u0648\u0633\u064a\u0635\u0644 \u0627\u0644\u0637\u0644\u0628 \u062a\u0644\u0642\u0627\u0626\u064a\u064b\u0627 \u0625\u0644\u0649 \u0628\u0631\u064a\u062f\u0646\u0627 \u0627\u0644\u0634\u062e\u0635\u064a \u0644\u0645\u0639\u0627\u0644\u062c\u0629 \u0627\u0634\u062a\u0631\u0627\u0643\u0643.
+          </p>
+          <label>
+            \u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644
+            <input
+              type="text"
+              value={values.fullName}
+              onChange={onChange("fullName")}
+              required
+              placeholder="\u0645\u062b\u0627\u0644: \u0645\u062d\u0645\u062f \u0623\u062d\u0645\u062f"
+            />
+          </label>
+          <label>
+            \u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a
+            <input
+              type="email"
+              value={values.email}
+              onChange={onChange("email")}
+              required
+              placeholder="you@example.com"
+            />
+          </label>
+          <label>
+            \u0631\u0642\u0645 \u0627\u0644\u0648\u0627\u062a\u0633\u0627\u0628 / \u0627\u0644\u0647\u0627\u062a\u0641
+            <input
+              type="tel"
+              value={values.phone}
+              onChange={onChange("phone")}
+              placeholder="+20 10 0000 0000"
+            />
+          </label>
+          <label>
+            \u0627\u0644\u062e\u062f\u0645\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629
+            <input
+              type="text"
+              value={values.service}
+              onChange={onChange("service")}
+              required
+              placeholder="\u0645\u062b\u0627\u0644: Netflix UHD"
+            />
+          </label>
+          <label>
+            \u062a\u0641\u0627\u0635\u064a\u0644 \u0625\u0636\u0627\u0641\u064a\u0629
+            <textarea
+              rows={4}
+              value={values.message}
+              onChange={onChange("message")}
+              placeholder="\u0623\u062e\u0628\u0631\u0646\u0627 \u0628\u0623\u064a \u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0623\u0648 \u062a\u0641\u0636\u064a\u0644\u0627\u062a \u062e\u0627\u0635\u0629."
+            />
+          </label>
+
+          {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
+          {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
+
+          <button type="submit" disabled={status.loading}>
+            {submitLabel}
+          </button>
+          <button type="button" className="auth-modal__link" onClick={onClose}>
+            \u0625\u063a\u0644\u0627\u0642 \u0627\u0644\u0646\u0627\u0641\u0630\u0629
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 
 
 export default App;
