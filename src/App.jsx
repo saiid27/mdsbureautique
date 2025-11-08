@@ -435,8 +435,8 @@ function HeaderBar({ language, onChangeLanguage, onOpenSignup, onOpenLogin, logg
   return (
     <header className="topbar">
       <div className="topbar__brand">
-        <span className="topbar__logo">M D S</span>
-        <span className="topbar__name">M D s Bireautique</span>
+        <span className="topbar__logo">MDS</span>
+        <span className="topbar__name">Bureautique</span>
       </div>
       <nav className="topbar__actions">
         <select
