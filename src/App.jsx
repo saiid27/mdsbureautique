@@ -14,6 +14,18 @@ const categories = [
 
 
 const products = [
+    {
+    id: "office-dewra",
+    name: "دورة في المعلوماتية   ",
+    description: "word , excel , powerpoint, access",
+    priceMru: "600",
+    billing: "مرة واحدة",
+    sold: 8120,
+    accountMask: "76**09",
+    lastPurchase: "قبل 5 ساعات",
+    category: "systems",
+    image: windows11Image,
+  },
   {
     id: "office-2021",
     name: "أوفيس 2021 برو",
@@ -39,18 +51,7 @@ const products = [
     image: windows10Image,
   },
 
-  {
-    id: "office-dewra",
-    name: "دورة في المعلوماتية   ",
-    description: "word , excel , powerpoint, access",
-    priceMru: "600",
-    billing: "مرة واحدة",
-    sold: 8120,
-    accountMask: "76**09",
-    lastPurchase: "قبل 5 ساعات",
-    category: "systems",
-    image: windows11Image,
-  },
+
 
 ];
 
