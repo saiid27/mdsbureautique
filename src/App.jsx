@@ -1,179 +1,96 @@
 import { useMemo, useState } from "react";
 import "./App.css";
+import officeImage from "./assets/off.jpg";
+import windows10Image from "./assets/w10.jpg";
+import windows11Image from "./assets/w11.jpg";
 
 const categories = [
-  { id: "all", icon: "🤝", label: "All", helper: "Every offer" },
-  { id: "ai", icon: "🤖", label: "AI", helper: "ChatGPT & more" },
-  { id: "media", icon: "🎬", label: "Audio & Video", helper: "Netflix, Spotify" },
-  { id: "design", icon: "🎨", label: "Creative", helper: "Adobe, Canva" },
-  { id: "productivity", icon: "🧠", label: "Productivity", helper: "Office, Windows" },
+
+  { id: "office", icon: "💻", label: "برامج مكتبية", helper: "أوفيس بجميع إصداراته" },
+  { id: "systems", icon: "🪟", label: " دورات ", helper: "دورة في المعلوماتية  " },
+
+
 ];
+
 
 const products = [
   {
-    id: "chatgpt-plus",
-    name: "ChatGPT Plus",
-    description: "Faster answers, always-on GPT-4 access for power users.",
-    price: 5.5,
-    billing: "month",
+    id: "office-2021",
+    name: "أوفيس 2021 برو",
+    description: "وورد، إكسل، باوربوينت، أكسس وتفعيل دائم.",
+    priceMru: "300",
+    billing: "مرة واحدة",
     sold: 34322,
     accountMask: "80**14",
-    lastPurchase: "2 hours ago",
-    category: "ai",
-    image: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+    lastPurchase: "قبل ساعتين",
+    category: "office",
+    image: officeImage,
   },
   {
-    id: "midjourney",
-    name: "Midjourney Boost",
-    description: "Add 15 fast hours for high quality renders during sprints.",
-    price: 6.99,
-    billing: "month",
+    id: "windows-pro",
+    name: "windowz  10",
+    description: "مفتاح أصلي مع تفعيل فوري ودعم كامل للتحديثات.",
+    priceMru: "280",
+    billing: "مرة واحدة",
     sold: 8120,
     accountMask: "76**09",
-    lastPurchase: "5 hours ago",
-    category: "ai",
-    image: "https://cdn-icons-png.flaticon.com/512/9131/9131529.png",
+    lastPurchase: "قبل 5 ساعات",
+    category: "office",
+    image: windows10Image,
+  },
+
+  {
+    id: "office-dewra",
+    name: "دورة في المعلوماتية   ",
+    description: "word , excel , powerpoint, access",
+    priceMru: "600",
+    billing: "مرة واحدة",
+    sold: 8120,
+    accountMask: "76**09",
+    lastPurchase: "قبل 5 ساعات",
+    category: "systems",
+    image: windows11Image,
+  },
+
+];
+
+const lessons = [
+  {
+    id: "lesson-01",
+    title: "Getting started with FamilyDeals",
+    duration: "12 min",
+    description: "Understand how the dashboard works and how to request premium accounts.",
+    resource: "https://example.com/docs/getting-started.pdf",
   },
   {
-    id: "adobe-cc",
-    name: "Adobe Creative Cloud",
-    description: "Create with Photoshop, Illustrator, Premiere Pro, and more.",
-    price: 4.99,
-    billing: "month",
-    sold: 63,
-    accountMask: "vl**14",
-    lastPurchase: "5 days ago",
-    category: "design",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Adobe_Corporate_logo.svg/512px-Adobe_Corporate_logo.svg.png",
+    id: "lesson-02",
+    title: "Optimizing shared accounts",
+    duration: "20 min",
+    description: "Best practices for managing profiles, renewals, and customer slots.",
+    resource: "https://example.com/docs/shared-accounts.pdf",
   },
   {
-    id: "canva-pro",
-    name: "Canva Pro Team",
-    description: "Unlimited templates, stock assets, and brand kit controls.",
-    price: 3.2,
-    billing: "month",
-    sold: 941,
-    accountMask: "ca**28",
-    lastPurchase: "1 day ago",
-    category: "design",
-    image: "https://upload.wikimedia.org/wikipedia/commons/3/30/Canva_Logo.png",
-  },
-  {
-    id: "office-365",
-    name: "Microsoft 365 Family",
-    description: "Six users with full Office apps and 1 TB OneDrive each.",
-    price: 6.4,
-    billing: "month",
-    sold: 1267,
-    accountMask: "ms**07",
-    lastPurchase: "today",
-    category: "productivity",
-    image: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
-  },
-  {
-    id: "windows-11",
-    name: "Windows 11 Pro Key",
-    description: "Instant OEM key with bilingual activation guide and support.",
-    price: 3.5,
-    billing: "license",
-    sold: 20450,
-    accountMask: "wn**43",
-    lastPurchase: "30 minutes ago",
-    category: "productivity",
-    image: "https://upload.wikimedia.org/wikipedia/commons/3/34/Windows_logo_-_2021.svg",
-  },
-  {
-    id: "spotify-duo",
-    name: "Spotify Premium Duo",
-    description: "Ad-free music streaming for two devices with offline mode.",
-    price: 2.99,
-    billing: "month",
-    sold: 14500,
-    accountMask: "sp**66",
-    lastPurchase: "3 hours ago",
-    category: "media",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
-  },
-  {
-    id: "netflix-uhd",
-    name: "Netflix Ultra HD",
-    description: "Watch unlimited series and films in crisp 4K resolution.",
-    price: 7.5,
-    billing: "month",
-    sold: 5874,
-    accountMask: "nt**22",
-    lastPurchase: "1 day ago",
-    category: "media",
-    image: "https://upload.wikimedia.org/wikipedia/commons/6/69/Netflix_logo.svg",
+    id: "lesson-03",
+    title: "Handling payments in MRU",
+    duration: "18 min",
+    description: "Quick overview of local gateways and how to convert USD pricing to MRU.",
+    resource: "https://example.com/docs/payments.pdf",
   },
 ];
 
-const languageLabels = {
-  en: "English",
-  fr: "Français",
-  ar: "العربية",
-};
-
 const heroCopy = {
-  en: {
-    heading: (
-      <>
-        Start Joining · <span>Enjoy Saving</span>
-      </>
-    ),
-    description: "Join premium subscriptions at family pricing, delivered instantly.",
-    cta: "Explore deals",
-  },
-  fr: {
-    heading: (
-      <>
-        Commencez ensemble · <span>Profitez des économies</span>
-      </>
-    ),
-    description: "Abonnez-vous aux meilleurs services à tarif familial, livraison immédiate.",
-    cta: "Découvrir les offres",
-  },
-  ar: {
-    heading: (
-      <>
-        ابدأ الاشتراك · <span>واستمتع بالتوفير</span>
-      </>
-    ),
-    description: "انضم إلى أفضل الاشتراكات الرقمية بأسعار عائلية وتسليم فوري.",
-    cta: "استكشف العروض",
-  },
-};
-
-const categoryCopy = {
-  en: {
-    all: "All",
-    helperAll: "Every offer",
-  },
-  fr: {
-    all: "Tout",
-    helperAll: "Toutes les offres",
-  },
-  ar: {
-    all: "الكل",
-    helperAll: "كل العروض",
-  },
+  heading: (
+    <>
+      ابدأ الاشتراك <span>واستمتع بالتوفير</span>
+    </>
+  ),
+  description: "انضم إلى أقوى الباقات العائلية واحصل على وصول فوري لكل الخدمات المميزة.",
+  cta: "استكشف العروض",
 };
 
 const productCopy = {
-  en: {
-    sold: "Sold",
-    cta: "Join in",
-  },
-  fr: {
-    sold: "Vendus",
-    cta: "Rejoindre",
-  },
-  ar: {
-    sold: "تم البيع",
-    cta: "انضم الآن",
-  },
+  sold: "تم البيع",
+  cta: "انضم الآن",
 };
 
 const SIGNUP_TARGET_EMAIL = "saiidfatis@gmail.com";
@@ -187,6 +104,13 @@ const signupDefaultValues = {
   phone: "",
   service: "",
   message: "",
+};
+
+const orderDefaultValues = {
+  fullName: "",
+  phone: "",
+  productName: "",
+  priceMru: "",
 };
 
 async function submitSignupLead(values) {
@@ -280,11 +204,42 @@ function extractLoginEntries(csvText) {
     .filter((entry) => entry.name && entry.password);
 }
 
+async function submitOrderLead(values) {
+  const payload = {
+    name: values.fullName,
+    phone: values.phone,
+    product: values.productName,
+    price_mru: values.priceMru,
+    _subject: `New order request: ${values.productName}`,
+    form_type: "product_order",
+    timestamp: new Date().toISOString(),
+  };
+
+  const response = await fetch(SIGNUP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let reason = "";
+    try {
+      const data = await response.json();
+      reason = data.message;
+    } catch {
+      // ignore
+    }
+    throw new Error(reason || "تفقد من اتصالك بالانترنت ");
+  }
+}
+
 
 
 function App() {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [language, setLanguage] = useState("en");
   const [showSignup, setShowSignup] = useState(false);
   const [signupValues, setSignupValues] = useState(() => ({ ...signupDefaultValues }));
   const [signupStatus, setSignupStatus] = useState({
@@ -296,6 +251,10 @@ function App() {
   const [loginValues, setLoginValues] = useState({ name: "", password: "" });
   const [loginStatus, setLoginStatus] = useState({ loading: false, error: "", message: "" });
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [showOrder, setShowOrder] = useState(false);
+  const [orderValues, setOrderValues] = useState({ ...orderDefaultValues });
+  const [orderStatus, setOrderStatus] = useState({ loading: false, error: "", message: "" });
+  const [activePage, setActivePage] = useState("home"); // home | lessons
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === "all") return products;
@@ -304,7 +263,11 @@ function App() {
 
   const openSignup = () => {
     setSignupValues({ ...signupDefaultValues });
-    setSignupStatus({ loading: false, error: "", message: "" });
+      setSignupStatus({
+        loading: false,
+        error: "",
+        message: "Thanks! We received your details and will reply by email shortly.",
+      });
     setShowSignup(true);
   };
 
@@ -331,7 +294,7 @@ function App() {
         closeSignup();
       }, 1200);
     } catch (error) {
-      const friendly = error?.message || "حدث خطأ";
+      const friendly = error?.message || "Something went wrong while verifying your credentials.";
       setSignupStatus({ loading: false, error: friendly, message: "" });
     }
   };
@@ -356,7 +319,7 @@ function App() {
       setLoginStatus({ loading: true, error: "", message: "" });
       const response = await fetch(SHEET_CSV_URL);
       if (!response.ok) {
-        throw new Error("");
+        throw new Error("We couldn't load the login sheet. Please try again.");
       }
 
       const text = await response.text();
@@ -370,43 +333,93 @@ function App() {
       );
 
       if (!match) {
-        throw new Error("");
+        throw new Error("Name or password is incorrect. Double-check both fields.");
       }
 
-      setLoginStatus({ loading: false, error: "", message: " " });
+      setLoginStatus({ loading: false, error: "", message: "Logged in successfully." });
       setLoggedInUser({ name: match.name });
+      setActivePage("lessons");
       setTimeout(() => {
         closeLogin();
       }, 900);
     } catch (error) {
-      const friendly = error?.message || " ";
+      const friendly = error?.message || "We couldn't send your request. Please try again.";
       setLoginStatus({ loading: false, error: friendly, message: "" });
     }
   };
 
   const handleLogoutUser = () => {
     setLoggedInUser(null);
+    setActivePage("home");
+  };
+
+  const openOrderModal = (product) => {
+    const priceMru = product.priceMru ?? "";
+    setOrderValues({
+      ...orderDefaultValues,
+      productName: product.name,
+      priceMru,
+    });
+    setOrderStatus({ loading: false, error: "", message: "" });
+    setShowOrder(true);
+  };
+
+  const closeOrderModal = () => {
+    setShowOrder(false);
+  };
+
+  const handleOrderChange = (field) => (event) => {
+    setOrderValues((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleOrderSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      setOrderStatus({ loading: true, error: "", message: "" });
+      await submitOrderLead(orderValues);
+      setOrderStatus({
+        loading: false,
+        error: "",
+        message: "Order sent! We'll contact you shortly.",
+      });
+      setTimeout(() => {
+        closeOrderModal();
+      }, 1000);
+    } catch (error) {
+      const friendly = error?.message || "Unable to submit the order form. Try again.";
+      setOrderStatus({ loading: false, error: friendly, message: "" });
+    }
+  };
+
+  const handleExploreClick = () => {
+    if (!loggedInUser) {
+      openLogin();
+      return;
+    }
+    setActivePage("home");
   };
 
   return (
     <div className="app">
       <HeaderBar
-        language={language}
-        onChangeLanguage={setLanguage}
         onOpenSignup={openSignup}
         onOpenLogin={openLogin}
         loggedInUser={loggedInUser}
         onLogout={handleLogoutUser}
+        onNavHome={() => setActivePage("home")}
+        onNavLessons={() => setActivePage("lessons")}
+        activePage={activePage}
       />
-      <main className="layout">
-        <HeroSection language={language} />
-        <CategoryBar
-          categories={categories}
-          language={language}
-          activeCategory={activeCategory}
-          onSelect={setActiveCategory}
-        />
-        <ProductSection language={language} products={filteredProducts} />
+      <main className={`layout${activePage === "lessons" ? " layout--lessons" : ""}`}>
+        {activePage === "lessons" ? (
+          <LessonsPage lessons={lessons} />
+        ) : (
+          <>
+            <HeroSection onExplore={handleExploreClick} />
+            <CategoryBar categories={categories} activeCategory={activeCategory} onSelect={setActiveCategory} />
+            <ProductSection products={filteredProducts} onJoin={openOrderModal} />
+          </>
+        )}
       </main>
 
       {showSignup ? (
@@ -427,11 +440,20 @@ function App() {
           onClose={closeLogin}
         />
       ) : null}
+      {showOrder ? (
+        <OrderModal
+          values={orderValues}
+          status={orderStatus}
+          onChange={handleOrderChange}
+          onSubmit={handleOrderSubmit}
+          onClose={closeOrderModal}
+        />
+      ) : null}
     </div>
   );
 }
 
-function HeaderBar({ language, onChangeLanguage, onOpenSignup, onOpenLogin, loggedInUser, onLogout }) {
+function HeaderBar({ onOpenSignup, onOpenLogin, loggedInUser, onLogout, onNavHome, onNavLessons, activePage }) {
   return (
     <header className="topbar">
       <div className="topbar__brand">
@@ -439,47 +461,55 @@ function HeaderBar({ language, onChangeLanguage, onOpenSignup, onOpenLogin, logg
         <span className="topbar__name">Bureautique</span>
       </div>
       <nav className="topbar__actions">
-        <select
-          className="language-switcher"
-          value={language}
-          onChange={(event) => onChangeLanguage(event.target.value)}
-        >
-          {Object.entries(languageLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
         {loggedInUser ? (
           <>
-            <span className="topbar__user">{`اسم المستخدم ${loggedInUser.name}`}</span>
+            <button
+              type="button"
+              className={activePage === "home" ? "is-active" : ""}
+              onClick={onNavHome}
+            >
+              العروض
+            </button>
+            <button
+              type="button"
+              className={activePage === "lessons" ? "is-active" : ""}
+              onClick={onNavLessons}
+            >
+              الدروس
+            </button>
+            <span className="topbar__user">{`مرحبا بك, ${loggedInUser.name}`}</span>
             <button type="button" onClick={onLogout}>
-              {"خروج"}
+             تسجيل الخروج
             </button>
           </>
         ) : (
           <>
             <button type="button" onClick={onOpenLogin}>
-              Login
+              تسجيل الدخول
             </button>
             <button type="button" className="primary" onClick={onOpenSignup}>
-              Sign Up
+             انشاء حساب
             </button>
           </>
         )}
       </nav>
     </header>
+
+
+
   );
 }
 
-function HeroSection({ language }) {
-  const copy = heroCopy[language];
+function HeroSection({ onExplore }) {
+  const copy = heroCopy;
   return (
     <section className="hero">
       <div className="hero__text">
         <h1>{copy.heading}</h1>
         <p>{copy.description}</p>
-        <button type="button">{copy.cta}</button>
+        <button type="button" onClick={onExplore}>
+          {copy.cta}
+        </button>
       </div>
       <div className="hero__art" aria-hidden="true">
         <div className="hero__illustration" />
@@ -488,14 +518,10 @@ function HeroSection({ language }) {
   );
 }
 
-function CategoryBar({ categories, language, activeCategory, onSelect }) {
-  const strings = categoryCopy[language];
+function CategoryBar({ categories, activeCategory, onSelect }) {
   return (
     <section className="categories">
       {categories.map((category) => {
-        const isAll = category.id === "all";
-        const label = isAll ? strings.all : category.label;
-        const helper = isAll ? strings.helperAll : category.helper;
         const isActive = category.id === activeCategory;
 
         return (
@@ -508,8 +534,8 @@ function CategoryBar({ categories, language, activeCategory, onSelect }) {
             <span className="categories__icon" aria-hidden="true">
               {category.icon}
             </span>
-            <span className="categories__label">{label}</span>
-            <span className="categories__helper">{helper}</span>
+            <span className="categories__label">{category.label}</span>
+            <span className="categories__helper">{category.helper}</span>
           </button>
         );
       })}
@@ -517,18 +543,18 @@ function CategoryBar({ categories, language, activeCategory, onSelect }) {
   );
 }
 
-function ProductSection({ products, language }) {
+function ProductSection({ products, onJoin }) {
   return (
     <section className="products">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} language={language} />
+        <ProductCard key={product.id} product={product} onJoin={onJoin} />
       ))}
     </section>
   );
 }
 
-function ProductCard({ product, language }) {
-  const strings = productCopy[language];
+function ProductCard({ product, onJoin }) {
+  const strings = productCopy;
 
   return (
     <article className="product-card">
@@ -551,10 +577,10 @@ function ProductCard({ product, language }) {
       </div>
       <footer className="product-card__footer">
         <div className="product-card__price">
-          <span className="product-card__price-value">${product.price}</span>
-          <span className="product-card__price-caption">/{product.billing}</span>
+          <span className="product-card__price-value">{product.priceMru} MRU</span>
+          <span className="product-card__price-caption">{product.billing}</span>
         </div>
-        <button type="button" className="product-card__cta">
+        <button type="button" className="product-card__cta" onClick={() => onJoin(product)}>
           {strings.cta}
         </button>
       </footer>
@@ -563,7 +589,7 @@ function ProductCard({ product, language }) {
 }
 
 function LoginModal({ values, status, onChange, onSubmit, onClose }) {
-  const submitLabel = status.loading ? "دخول" : "تم";
+  const submitLabel = status.loading ? "جاري التحقق..." : "دخول";
 
   return (
     <div className="auth-modal">
@@ -572,27 +598,27 @@ function LoginModal({ values, status, onChange, onSubmit, onClose }) {
         <button type="button" className="auth-modal__close" onClick={onClose}>
           ×
         </button>
-        <h2>تسجيل دخول</h2>
+        <h2>تسجيل الدخول</h2>
 
         <form className="auth-modal__form" onSubmit={onSubmit}>
           <label>
-          email
+            الاسم الكامل
             <input
               type="text"
               value={values.name}
               onChange={onChange("name")}
               required
-              placeholder="البريد الالكتروني"
+              placeholder="Must match the sheet entry"
             />
           </label>
           <label>
-           mot de passe
+            كلمة المرور
             <input
               type="password"
               value={values.password}
               onChange={onChange("password")}
               required
-              placeholder="كلمة المرور"
+              placeholder="********"
             />
           </label>
 
@@ -603,7 +629,7 @@ function LoginModal({ values, status, onChange, onSubmit, onClose }) {
             {submitLabel}
           </button>
           <button type="button" className="auth-modal__link" onClick={onClose}>
-           رجوع
+            اغلاق
           </button>
         </form>
       </div>
@@ -612,7 +638,7 @@ function LoginModal({ values, status, onChange, onSubmit, onClose }) {
 }
 
 function SignupModal({ values, status, onChange, onSubmit, onClose }) {
-  const submitLabel = status.loading ? "دخول" : "دخول";
+  const submitLabel = status.loading ? "جاري الانشاء والتحقق..." : "إنشاء";
 
   return (
     <div className="auth-modal">
@@ -625,61 +651,48 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
 
         <form className="auth-modal__form" onSubmit={onSubmit}>
           <p className="auth-modal__info">
-رجاءا تأكد من صحة المعلومات 
+       الرجاء ادخال معلومات صحيحة معلومات صحيحة
           </p>
           <label>
-         Name : 
+          الاسم الكامل
             <input
               type="text"
               value={values.fullName}
               onChange={onChange("fullName")}
               required
-              placeholder="إسم المستخدم"
+              placeholder="Example: Mohamed Ahmed"
             />
           </label>
           <label>
-            Email :
+            البريد الالكتروني 
             <input
               type="email"
               value={values.email}
               onChange={onChange("email")}
               required
-              placeholder="البريد الالكتروني "
+              placeholder="you@example.com"
             />
           </label>
           <label>
-          Numéro whatsapp :
+           رقم الواتساب
             <input
               type="tel"
               value={values.phone}
               onChange={onChange("phone")}
-              placeholder="رقم الواتساب"
+              placeholder="+20 10 0000 0000"
             />
           </label>
           <label>
-            Mot de passe :
+            كلمة المرور
             <input
               type="text"
               value={values.service}
               onChange={onChange("service")}
               required
-              placeholder="كلمة المرور"
+              placeholder=""
             />
           </label>
-       
-
- <label>
-            Mot de passe :
-            <input
-              type="text"
-              value={values.service}
-              onChange={onChange("service")}
-              required
-              placeholder="كلمة المرور"
-            />
-          </label>
-
-
+        
 
           {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
           {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
@@ -688,7 +701,7 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
             {submitLabel}
           </button>
           <button type="button" className="auth-modal__link" onClick={onClose}>
-          رجوع
+            اغلاق
           </button>
         </form>
       </div>
@@ -696,6 +709,100 @@ function SignupModal({ values, status, onChange, onSubmit, onClose }) {
   );
 }
 
+function OrderModal({ values, status, onChange, onSubmit, onClose }) {
+  const submitLabel = status.loading ? "Sending..." : "Send order";
+  return (
+    <div className="auth-modal">
+      <div className="auth-modal__overlay" onClick={onClose} />
+      <div className="auth-modal__panel">
+        <button type="button" className="auth-modal__close" onClick={onClose}>
+          ×
+        </button>
+        <h2>Confirm your order</h2>
+        <form className="auth-modal__form" onSubmit={onSubmit}>
+          <label>
+            Full name
+            <input
+              type="text"
+              value={values.fullName}
+              onChange={onChange("fullName")}
+              required
+              placeholder="Your full name"
+            />
+          </label>
+          <label>
+            Phone / WhatsApp
+            <input
+              type="tel"
+              value={values.phone}
+              onChange={onChange("phone")}
+              required
+              placeholder="+222 XX XX XX XX"
+            />
+          </label>
+          <label>
+            Product name
+            <input
+              type="text"
+              value={values.productName}
+              onChange={onChange("productName")}
+              required
+            />
+          </label>
+          <label>
+            Price (MRU)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={values.priceMru}
+              onChange={onChange("priceMru")}
+              required
+            />
+          </label>
 
+          {status.error ? <p className="auth-modal__error">{status.error}</p> : null}
+          {status.message ? <p className="auth-modal__success">{status.message}</p> : null}
+
+          <button type="submit" disabled={status.loading}>
+            {submitLabel}
+          </button>
+          <button type="button" className="auth-modal__link" onClick={onClose}>
+            Close
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+function LessonsPage({ lessons }) {
+  return (
+    <section className="lessons-page">
+      <header className="lessons-page__header">
+        <h1>Course lessons</h1>
+        <p>All recordings and resources are available below after you log in.</p>
+      </header>
+      <div className="lessons-page__grid">
+        {lessons.map((lesson) => (
+          <article key={lesson.id} className="lesson-card">
+            <div className="lesson-card__meta">
+              <span className="lesson-card__badge">{lesson.duration}</span>
+            </div>
+            <h3>{lesson.title}</h3>
+            <p>{lesson.description}</p>
+            <a href={lesson.resource} target="_blank" rel="noreferrer" className="lesson-card__link">
+              Open resource
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+
+
+
+
+  );
+}
 
 export default App;
