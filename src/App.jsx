@@ -82,10 +82,10 @@ const lessons = [
 const heroCopy = {
   heading: (
     <>
-      ابدأ الاشتراك <span>واستمتع بالتوفير</span>
+      ابدأ رحلتك <span>واستمتع بدوراتنا </span>
     </>
   ),
-  description: "انضم إلى أقوى الباقات العائلية واحصل على وصول فوري لكل الخدمات المميزة.",
+  description: "  للتسجيل في دورتنا ماعليك سوي إنشاء حساب ومتابعة الفيديوهات .",
   cta: "استكشف العروض",
 };
 
@@ -421,6 +421,7 @@ function App() {
             <ProductSection products={filteredProducts} onJoin={openOrderModal} />
           </>
         )}
+        <Footer />
       </main>
 
       {showSignup ? (
@@ -803,6 +804,14 @@ function LessonsPage({ lessons }) {
 
 
 
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="app-footer">
+      <p>dev.med said mohameden</p>
+    </footer>
   );
 }
 
