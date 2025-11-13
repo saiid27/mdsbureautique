@@ -811,7 +811,7 @@ function Footer() {
   return (
     <footer className="app-footer">
       <p>MDS|bureautique@2025-2026</p>
-      <p>dev.med said mohameden | dev.sidi med  </p>
+      <p>dev. med said mohameden | dev.sidi med  </p>
     </footer>
   );
 }
