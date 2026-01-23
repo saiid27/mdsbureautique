@@ -82,19 +82,32 @@ const lessons = [
 const heroCopy = {
   heading: (
     <>
-      ابدأ رحلتك <span>واستمتع بدوراتنا </span>
+
+
+  saiid-chat
+     <span>
+
+تطبيق
+
+     </span>
     </>
   ),
-  description: "  للتسجيل في دورتنا ماعليك سوي إنشاء حساب ومتابعة الفيديوهات .",
-  cta: "استكشف العروض",
+  description: " متوفر حاليا لهواتف الاندرويد.",
+  cta: " ",
+  downloadCta: "تحميل التطبيق",
 };
+
+const APP_DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=1cSSnvqt2ZUVpEbZOS0vDNEYUu3V7Zxx_";
+
 
 const productCopy = {
   sold: "تم البيع",
   cta: "انضم الآن",
 };
 
-const SIGNUP_TARGET_EMAIL = "saiidfatis@gmail.com";
+const resolvedEnvEmail = import.meta?.env?.VITE_SIGNUP_TARGET_EMAIL;
+const SIGNUP_TARGET_EMAIL =
+  typeof resolvedEnvEmail === "string" && resolvedEnvEmail.trim() ? resolvedEnvEmail.trim() : "saiidfatis@gmail.com";
 const SIGNUP_ENDPOINT = `https://formsubmit.co/ajax/${encodeURIComponent(SIGNUP_TARGET_EMAIL)}`;
 const SHEET_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyeu9IDkdfadmmO3IDCNUixWS8GaUTyMFWy94KIlkmuUpMJT49h7_Px_rA2amN-gHOZBpr4VZQMBXV/pub?output=csv";
@@ -114,7 +127,16 @@ const orderDefaultValues = {
   priceMru: "",
 };
 
+function assertHostedEnvironment() {
+  if (typeof window !== "undefined" && window.location?.protocol === "file:") {
+    throw new Error(
+      "لا يمكن إرسال البيانات من نسخة يتم فتحها مباشرةً من الملف. شغّل الموقع عبر خادم (npm run dev أو استضافة https) ثم حاول مجددًا."
+    );
+  }
+}
+
 async function submitSignupLead(values) {
+  assertHostedEnvironment();
   const payload = {
     name: values.fullName,
     email: values.email,
@@ -206,6 +228,7 @@ function extractLoginEntries(csvText) {
 }
 
 async function submitOrderLead(values) {
+  assertHostedEnvironment();
   const payload = {
     name: values.fullName,
     phone: values.phone,
@@ -509,9 +532,14 @@ function HeroSection({ onExplore }) {
       <div className="hero__text">
         <h1>{copy.heading}</h1>
         <p>{copy.description}</p>
-        <button type="button" onClick={onExplore}>
-          {copy.cta}
-        </button>
+        <div className="hero__actions">
+          <button type="button" onClick={onExplore}>
+            {copy.cta}
+          </button>
+          <a className="hero__download" href={APP_DOWNLOAD_URL} download target="_blank" rel="noreferrer">
+            {copy.downloadCta}
+          </a>
+        </div>
       </div>
       <div className="hero__art" aria-hidden="true">
         <div className="hero__illustration" />
@@ -811,7 +839,7 @@ function Footer() {
   return (
     <footer className="app-footer">
       <p>MDS|bureautique@2025-2026</p>
-      <p>dev. med said mohameden | dev.sidi med  </p>
+      <p>dev. med said mohameden   </p>
     </footer>
   );
 }

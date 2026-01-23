@@ -175,6 +175,32 @@
   box-shadow: 0 12px 24px rgba(17, 24, 39, 0.35);
 }
 
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero__download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: clamp(0.55rem, 2vw, 0.65rem) clamp(1.2rem, 4vw, 1.6rem);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.hero__download:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 12px 24px rgba(17, 24, 39, 0.35);
+}
+
 .hero__art {
   position: relative;
   display: grid;
@@ -490,6 +516,14 @@
   .hero__text button {
     width: 100%;
     text-align: center;
+  }
+
+  .hero__actions {
+    width: 100%;
+  }
+
+  .hero__actions > * {
+    width: 100%;
   }
 
   .categories {
